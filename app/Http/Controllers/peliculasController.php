@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NuevaPelicula;
 use App\Models\pelicula as Pelicula;
 class peliculasController extends Controller
 {
@@ -26,7 +28,7 @@ class peliculasController extends Controller
         $pelicula->duration = $validated['duration'];
         $pelicula->director = $validated['director'];
         $pelicula->save();
-
+        Mail::to('rica-sal@hotmail.com')->send(new NuevaPelicula($pelicula, route('peliculas.show', $pelicula->id)));
         return redirect()->route('peliculas.index');
     }
     public function delete($id)

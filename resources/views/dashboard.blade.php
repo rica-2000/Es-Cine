@@ -15,4 +15,15 @@
             <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
         </div>
     </div>
+    <div>
+        <form action="{{ route('admin.reportePeliculasSalas') }}" method="GET">
+            <label for="sala_id" class="custom-file-upload">Salas</label>
+            <select name="sala_id" id="sala_id">
+                @foreach($salas as $sala)
+                    <option value="{{ $sala->id }}">{{ $sala->nombre }}</option>
+                @endforeach
+            </select>
+            <button type="submit">Generar Reporte</button>
+        </form>
+    </div>
 </x-layouts.app>

@@ -10,12 +10,16 @@ use App\Http\Controllers\adminController;
 use App\Http\Controllers\sucursalesController;
 use App\Http\Controllers\salasController;
 use App\Http\Controllers\peliculasController;
+use App\Http\Controllers\funcionesController;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', function () {
+    $salas = \App\Models\sala::orderBy('nombre')->get(['id', 'nombre']);
+    return view('dashboard', compact('salas'));
+})
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -57,6 +61,17 @@ Route::middleware(['auth'])->group(function () {
         Route::match(['put','patch'], 'peliculas/update/{id}', [peliculasController::class, 'update'])->name('peliculas.update');
         Route::delete('peliculas/delete/{id}', [peliculasController::class, 'delete'])->name('peliculas.delete');
         Route::get('peliculas/modifica/{id}', [peliculasController::class, 'show'])->name('peliculas.show');
+
+    //Rutas de funciones
+    Route::get('funciones/index', [funcionesController::class, 'index'])->name('funciones.index');
+    Route::post('funciones/save', [funcionesController::class, 'save'])->name('funciones.save');
+    Route::match(['put','patch'], 'funciones/update/{id}', [funcionesController::class, 'update'])->name('funciones.update');
+    Route::delete('funciones/delete/{id}', [funcionesController::class, 'delete'])->name('funciones.delete');
+    Route::get('funciones/modifica/{id}', [funcionesController::class, 'show'])->name('funciones.show');
+
+    //Ruta para generar reporte de peliculas por sala
+    Route::get('admin/reporte-peliculas-salas', [adminController::class, 'generarReportePeliculasSalas'])->name('admin.reportePeliculasSalas');
+    
 });
 
 require __DIR__.'/auth.php';

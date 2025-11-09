@@ -4,9 +4,14 @@
             <flux:heading size="lg">{{ __('Películas') }}</flux:heading>
             <flux:text class="mt-1">{{ __('Administra las películas disponibles.') }}</flux:text>
         </div>
-        <flux:modal.trigger name="pelicula-create">
-            <flux:button variant="primary">{{ __('Agregar Película') }}</flux:button>
-        </flux:modal.trigger>
+        <div class="flex items-center gap-3">
+            <flux:modal.trigger name="pelicula-import">
+                <flux:button>{{ __('Importar desde Excel') }}</flux:button>
+            </flux:modal.trigger>
+            <flux:modal.trigger name="pelicula-create">
+                <flux:button variant="primary">{{ __('Agregar Película') }}</flux:button>
+            </flux:modal.trigger>
+        </div>
     </div>
 
     <flux:modal name="pelicula-create" class="md:w-[480px]">
@@ -46,6 +51,27 @@
             </div>
             <div class="flex items-center gap-4 pt-2">
                 <flux:button type="submit">{{ __('Guardar Película') }}</flux:button>
+                <flux:button type="button" class="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200" x-on:click="$dispatch('close')">{{ __('Cancelar') }}</flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    <flux:modal name="pelicula-import" class="md:w-[480px]">
+        <div>
+            <flux:heading size="lg">{{ __('Importar películas') }}</flux:heading>
+            <flux:text class="mt-2">{{ __('Sube un archivo .xlsx, .xls o .csv con las columnas: Título, Género, Duración (min), Director, en ese orden.') }}</flux:text>
+        </div>
+        <form method="POST" action="{{ route('peliculas.import') }}" class="mt-6 space-y-5" enctype="multipart/form-data">
+            @csrf
+            <div>
+                <flux:label for="file" value="{{ __('Archivo') }}" />
+                <input id="file" name="file" type="file" accept=".xlsx,.xls,.csv" class="mt-1 block w-full text-sm" required />
+                @foreach ($errors->get('file') as $message)
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @endforeach
+            </div>
+            <div class="flex items-center gap-4 pt-2">
+                <flux:button type="submit">{{ __('Importar') }}</flux:button>
                 <flux:button type="button" class="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200" x-on:click="$dispatch('close')">{{ __('Cancelar') }}</flux:button>
             </div>
         </form>

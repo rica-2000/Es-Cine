@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
         //Rutas de peliculas
         Route::get('peliculas/index', [peliculasController::class, 'index'])->name('peliculas.index');
         Route::post('peliculas/save', [peliculasController::class, 'save'])->name('peliculas.save');
+    Route::post('peliculas/import', [peliculasController::class, 'import'])->name('peliculas.import');
         Route::match(['put','patch'], 'peliculas/update/{id}', [peliculasController::class, 'update'])->name('peliculas.update');
         Route::delete('peliculas/delete/{id}', [peliculasController::class, 'delete'])->name('peliculas.delete');
         Route::get('peliculas/modifica/{id}', [peliculasController::class, 'show'])->name('peliculas.show');

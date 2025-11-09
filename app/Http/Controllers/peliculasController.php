@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NuevaPelicula;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\PeliculasImport;
 use App\Models\pelicula as Pelicula;
 class peliculasController extends Controller
 {
@@ -11,6 +13,17 @@ class peliculasController extends Controller
     {
         $peliculas = Pelicula::all();
         return view('peliculas', compact('peliculas'));
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'], // 10MB
+        ]);
+
+        Excel::import(new PeliculasImport, $validated['file']);
+
+        return redirect()->route('peliculas.index')->with('status', __('Películas importadas correctamente.'));
     }
 
     public function save(Request $request)

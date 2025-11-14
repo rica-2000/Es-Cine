@@ -11,14 +11,70 @@ use App\Http\Controllers\sucursalesController;
 use App\Http\Controllers\salasController;
 use App\Http\Controllers\peliculasController;
 use App\Http\Controllers\funcionesController;
+use App\Models\pelicula;
+use App\Models\sala;
+use App\Models\sucursal;
+use App\Models\funcion;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
 Route::get('dashboard', function () {
-    $salas = \App\Models\sala::orderBy('nombre')->get(['id', 'nombre']);
-    return view('dashboard', compact('salas'));
+    $totalPeliculas = pelicula::count();
+    $totalSalas = sala::count();
+    $totalSucursales = sucursal::count();
+
+    $hoy = Carbon::today();
+    $inicioVentana = $hoy->copy()->subDays(6)->startOfDay();
+    $totalFuncionesUltimos7 = funcion::where('fecha', '>=', $inicioVentana)->count();
+
+    $labelsDias = [];
+    $funcionesPorDia = [];
+    $ingresosPorDia = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $dia = $hoy->copy()->subDays($i);
+        $labelsDias[] = $dia->format('d/m');
+        $conteo = funcion::whereDate('fecha', $dia->toDateString())->count();
+        $funcionesPorDia[] = $conteo;
+        $ingresos = (float) funcion::whereDate('fecha', $dia->toDateString())->sum('costo');
+        $ingresosPorDia[] = round($ingresos, 2);
+    }
+
+    $generos = pelicula::select('genero', DB::raw('COUNT(*) as total'))
+        ->groupBy('genero')
+        ->orderByDesc('total')
+        ->get();
+    $peliculasGeneroLabels = $generos->pluck('genero')->map(fn($g) => $g ?: 'N/D');
+    $peliculasGeneroData = $generos->pluck('total');
+
+    $topPeliculas = funcion::select('pelicula_id', DB::raw('COUNT(*) as total'))
+        ->with('pelicula')
+        ->groupBy('pelicula_id')
+        ->orderByDesc('total')
+        ->limit(5)
+        ->get();
+    $topPeliculasLabels = $topPeliculas->map(fn($f) => optional($f->pelicula)->title ?? 'N/D');
+    $topPeliculasData = $topPeliculas->pluck('total');
+
+    $salas = sala::orderBy('nombre')->get(['id', 'nombre']);
+
+    return view('dashboard', compact(
+        'totalPeliculas',
+        'totalSalas',
+        'totalSucursales',
+        'totalFuncionesUltimos7',
+        'labelsDias',
+        'funcionesPorDia',
+        'ingresosPorDia',
+        'peliculasGeneroLabels',
+        'peliculasGeneroData',
+        'topPeliculasLabels',
+        'topPeliculasData',
+        'salas'
+    ));
 })
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

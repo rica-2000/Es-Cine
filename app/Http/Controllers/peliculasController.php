@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NuevaPelicula;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\PeliculasImport;
+use App\Models\pelicula as Pelicula;
+class peliculasController extends Controller
+{
+    public function index()
+    {
+        $peliculas = Pelicula::all();
+        return view('peliculas', compact('peliculas'));
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'], // 10MB
+        ]);
+
+        Excel::import(new PeliculasImport, $validated['file']);
+
+        return redirect()->route('peliculas.index')->with('status', __('Películas importadas correctamente.'));
+    }
+
+    public function save(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'genre' => ['required', 'string', 'max:100'],
+            'duration' => ['required', 'integer', 'min:1'],
+            'director' => ['required', 'string', 'max:255'],
+        ]);
+
+        $pelicula = new Pelicula();
+        $pelicula->title = $validated['title'];
+        $pelicula->genre = $validated['genre'];
+        $pelicula->duration = $validated['duration'];
+        $pelicula->director = $validated['director'];
+        $pelicula->save();
+        Mail::to('rica-sal@hotmail.com')->send(new NuevaPelicula($pelicula, route('peliculas.show', $pelicula->id)));
+        return redirect()->route('peliculas.index');
+    }
+    public function delete($id)
+    {
+        $pelicula = Pelicula::find($id);
+        if ($pelicula) {
+            $pelicula->delete();
+        }
+        return redirect()->back();
+    }
+    public function show($id)
+    {
+        $pelicula = Pelicula::findOrFail($id);
+        return view('peliculas-modifica', compact('pelicula'));
+    }
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'genre' => ['required', 'string', 'max:100'],
+            'duration' => ['required', 'integer', 'min:1'],
+            'director' => ['required', 'string', 'max:255'],
+        ]);
+
+        $pelicula = Pelicula::findOrFail($id);
+        $pelicula->title = $validated['title'];
+        $pelicula->genre = $validated['genre'];
+        $pelicula->duration = $validated['duration'];
+        $pelicula->director = $validated['director'];
+        $pelicula->save();
+
+        return redirect()->route('peliculas.index');
+    }
+    
+}

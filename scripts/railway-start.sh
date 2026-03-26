@@ -17,6 +17,11 @@ mkdir -p storage/logs
 
 chmod -R ug+rw storage bootstrap/cache || true
 
+# En produccion no debe existir hot file de Vite (apunta a dev server local).
+rm -f public/hot || true
+
+php artisan optimize:clear || true
+
 php artisan storage:link --force || true
 php artisan migrate --force
 

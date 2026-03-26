@@ -8,6 +8,15 @@ if [ -z "${APP_KEY}" ]; then
 fi
 
 echo "[Railway] Preparando aplicacion..."
+
+mkdir -p bootstrap/cache
+mkdir -p storage/framework/cache/data
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/logs
+
+chmod -R ug+rw storage bootstrap/cache || true
+
 php artisan storage:link --force || true
 php artisan migrate --force
 

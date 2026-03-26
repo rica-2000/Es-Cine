@@ -1,0 +1,17 @@
+[variables]
+NODE_ENV = "production"
+
+[phases.setup]
+nixPkgs = ["php83", "php83Extensions.pdo_mysql", "php83Extensions.mbstring", "php83Extensions.bcmath", "php83Extensions.xml", "php83Extensions.curl", "php83Extensions.fileinfo", "php83Extensions.dom", "nodejs_20", "npm-10_x", "composer"]
+
+[phases.install]
+cmds = [
+  "composer install --no-dev --optimize-autoloader --no-interaction",
+  "npm ci --no-audit --no-fund"
+]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "bash scripts/railway-start.sh"

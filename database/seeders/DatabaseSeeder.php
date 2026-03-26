@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,18 +14,40 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $demoUsers = [
+            [
+                'name' => 'Administrador Cine',
+                'email' => 'admin@cine.com',
+                'role' => 'admin',
+                'password' => Hash::make('Admin12345!'),
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'Operador Cine',
+                'email' => 'operador@cine.com',
+                'role' => 'usuario',
+                'password' => Hash::make('Operador123!'),
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'Invitado Demo',
+                'email' => 'demo@cine.com',
+                'role' => 'usuario',
+                'password' => Hash::make('Demo12345!'),
+                'email_verified_at' => now(),
+            ],
+        ];
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'role' => 'admin',
-            'password' => bcrypt('12345678'),
-        ]);
+        foreach ($demoUsers as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'role' => $userData['role'],
+                    'password' => $userData['password'],
+                    'email_verified_at' => $userData['email_verified_at'],
+                ]
+            );
+        }
     }
 }
